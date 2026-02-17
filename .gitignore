@@ -1,0 +1,23 @@
+# OS / tooling
+.DS_Store
+Thumbs.db
+
+# Node/Python build artifacts
+node_modules/
+dist/
+build/
+.venv/
+__pycache__/
+*.pyc
+
+# Env + secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
