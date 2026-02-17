@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: Case Management API
+  version: 1.0.0
+  description: |
+    Demo case system for creating dispute cases.
+servers:
+  - url: https://apim.example.com
+paths:
+  /cases/disputes:
+    post:
+      summary: Create a dispute case
+      operationId: createDisputeCase
+      tags: [cases]
+      parameters:
+        - in: header
+          name: x-correlation-id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDisputeRequest'
+            examples:
+              happy:
+                value:
+                  customer_id: "cust-001"
+                  transaction_id: "txn-24750"
+                  amount_eur: 247.50
+                  reason: "I don't recognize this charge"
+                  eligibility:
+                    eligible: true
+                    rules_version: "rules-2026-01"
+      responses:
+        '201':
+          description: Case created
+          headers:
+            x-correlation-id:
+              required: true
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDisputeResponse'
+              examples:
+                created:
+                  value:
+                    case_id: "case-10001"
+                    status: "opened"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (policy violation)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+components:
+  schemas:
+    CreateDisputeRequest:
+      type: object
+      required: [customer_id, transaction_id, amount_eur, reason, eligibility]
+      additionalProperties: false
+      properties:
+        customer_id: { type: string }
+        transaction_id: { type: string }
+        amount_eur:
+          type: number
+          minimum: 0
+        reason: { type: string }
+        eligibility:
+          type: object
+          required: [eligible, rules_version]
+          additionalProperties: false
+          properties:
+            eligible: { type: boolean }
+            rules_version: { type: string }
+    CreateDisputeResponse:
+      type: object
+      required: [case_id, status]
+      additionalProperties: false
+      properties:
+        case_id: { type: string }
+        status:
+          type: string
+          enum: [opened]
+    Error:
+      type: object
+      required: [code, message]
+      additionalProperties: false
+      properties:
+        code: { type: string }
+        message: { type: string }

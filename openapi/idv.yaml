@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: Identity Verification API
+  version: 1.0.0
+  description: |
+    Demo identity verification service used as a hard gate for sensitive actions.
+servers:
+  - url: https://apim.example.com
+paths:
+  /idv/verify:
+    post:
+      summary: Verify customer identity
+      operationId: verifyIdentity
+      tags: [idv]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+            examples:
+              happy:
+                summary: Happy path verification
+                value:
+                  correlation_id: "c-123"
+                  customer_id: "cust-001"
+                  factors:
+                    otp: "123456"
+                    kbv_score: 0.88
+                    device_trust: 0.92
+      responses:
+        '200':
+          description: Verification result
+          headers:
+            x-correlation-id:
+              required: true
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+              examples:
+                verified:
+                  value:
+                    verified: true
+                    identity_confidence: 0.93
+                    verification_token: "vtok_abc123"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+components:
+  schemas:
+    VerifyRequest:
+      type: object
+      required: [correlation_id, customer_id, factors]
+      additionalProperties: false
+      properties:
+        correlation_id:
+          type: string
+          description: Correlation ID used end-to-end for tracing
+        customer_id:
+          type: string
+        factors:
+          type: object
+          additionalProperties: false
+          properties:
+            otp:
+              type: string
+              description: One-time password (demo factor)
+            kbv_score:
+              type: number
+              minimum: 0
+              maximum: 1
+              description: Knowledge-based verification score (0..1)
+            device_trust:
+              type: number
+              minimum: 0
+              maximum: 1
+              description: Device trust score (0..1)
+    VerifyResponse:
+      type: object
+      required: [verified, identity_confidence, verification_token]
+      additionalProperties: false
+      properties:
+        verified:
+          type: boolean
+        identity_confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        verification_token:
+          type: string
+          description: Must be presented to APIM for sensitive payment changes
+    Error:
+      type: object
+      required: [code, message]
+      additionalProperties: false
+      properties:
+        code: { type: string }
+        message: { type: string }
