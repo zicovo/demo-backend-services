@@ -1,0 +1,291 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "description": "Demo case system for creating dispute cases.\n",
+    "version": "1.0.0",
+    "title": "Case Management API"
+  },
+  "paths": {
+    "/cases/{case_id}": {
+      "get": {
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-correlation-id",
+            "in": "header",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "case_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "headers": {
+              "x-correlation-id": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Case record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseRecord"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getCase",
+        "summary": "Get case details"
+      }
+    },
+    "/cases/disputes": {
+      "post": {
+        "tags": [
+          "cases"
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (policy violation)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "headers": {
+              "x-correlation-id": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Case created",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "created": {
+                    "value": {
+                      "status": "opened",
+                      "case_id": "case-10001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDisputeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a dispute case",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-correlation-id",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "operationId": "createDisputeCase",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "happy": {
+                  "value": {
+                    "amount_eur": 247.50,
+                    "reason": "I don't recognize this charge",
+                    "eligibility": {
+                      "eligible": true,
+                      "rules_version": "rules-2026-01"
+                    },
+                    "customer_id": "cust-001",
+                    "transaction_id": "txn-24750"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/CreateDisputeRequest"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateDisputeResponse": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "case_id",
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "opened"
+            ]
+          },
+          "case_id": {
+            "type": "string"
+          }
+        }
+      },
+      "CaseRecord": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "case_id",
+          "status",
+          "created_at",
+          "customer_id",
+          "transaction_id",
+          "amount_eur",
+          "reason",
+          "rules_version"
+        ],
+        "properties": {
+          "rules_version": {
+            "type": "string"
+          },
+          "customer_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "opened"
+            ]
+          },
+          "case_id": {
+            "type": "string"
+          },
+          "amount_eur": {
+            "type": "number"
+          },
+          "transaction_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateDisputeRequest": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "transaction_id",
+          "amount_eur",
+          "reason",
+          "eligibility"
+        ],
+        "properties": {
+          "amount_eur": {
+            "type": "number",
+            "minimum": 0
+          },
+          "reason": {
+            "type": "string"
+          },
+          "eligibility": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "eligible",
+              "rules_version"
+            ],
+            "properties": {
+              "eligible": {
+                "type": "boolean"
+              },
+              "rules_version": {
+                "type": "string"
+              }
+            }
+          },
+          "customer_id": {
+            "type": "string"
+          },
+          "transaction_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://apim.example.com"
+    }
+  ]
+}

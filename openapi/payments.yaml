@@ -67,6 +67,37 @@ paths:
                   value:
                     code: "verification_required"
                     message: "Identity verification token is required."
+  /payments/direct-debit/{customer_id}:
+    get:
+      summary: Get direct debit details for a customer
+      operationId: getDirectDebit
+      tags: [payments]
+      parameters:
+        - in: header
+          name: x-correlation-id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: customer_id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Direct debit record
+          headers:
+            x-correlation-id:
+              required: true
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectDebitRecord'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
 components:
   schemas:
     DirectDebitUpdateRequest:
@@ -90,6 +121,15 @@ components:
         updated_at:
           type: string
           format: date-time
+    DirectDebitRecord:
+      type: object
+      required: [customer_id, iban, mandate_reference, updated_at]
+      additionalProperties: false
+      properties:
+        customer_id: { type: string }
+        iban: { type: string }
+        mandate_reference: { type: string }
+        updated_at: { type: string, format: date-time }    
     Error:
       type: object
       required: [code, message]

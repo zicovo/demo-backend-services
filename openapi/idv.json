@@ -1,0 +1,176 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "description": "Demo identity verification service used as a hard gate for sensitive actions.\n",
+    "version": "1.0.0",
+    "title": "Identity Verification API"
+  },
+  "paths": {
+    "/idv/verify": {
+      "post": {
+        "tags": [
+          "idv"
+        ],
+        "responses": {
+          "200": {
+            "headers": {
+              "x-correlation-id": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "verified": {
+                    "value": {
+                      "verification_token": "vtok_abc123",
+                      "verified": true,
+                      "identity_confidence": 0.93
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "happy": {
+                  "value": {
+                    "factors": {
+                      "otp": "123456",
+                      "device_trust": 0.92,
+                      "kbv_score": 0.88
+                    },
+                    "correlation_id": "c-123",
+                    "customer_id": "cust-001"
+                  },
+                  "summary": "Happy path verification"
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          }
+        },
+        "operationId": "verifyIdentity",
+        "summary": "Verify customer identity"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VerifyRequest": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "correlation_id",
+          "customer_id",
+          "factors"
+        ],
+        "properties": {
+          "factors": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "otp": {
+                "type": "string",
+                "description": "One-time password (demo factor)"
+              },
+              "device_trust": {
+                "description": "Device trust score (0..1)",
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              "kbv_score": {
+                "description": "Knowledge-based verification score (0..1)",
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              }
+            }
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Correlation ID used end-to-end for tracing"
+          },
+          "customer_id": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyResponse": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "verified",
+          "identity_confidence",
+          "verification_token"
+        ],
+        "properties": {
+          "verification_token": {
+            "type": "string",
+            "description": "Must be presented to APIM for sensitive payment changes"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "identity_confidence": {
+            "type": "number",
+            "maximum": 1,
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://apim.example.com"
+    }
+  ]
+}

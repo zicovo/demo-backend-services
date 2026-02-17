@@ -32,7 +32,7 @@ paths:
                   reason: "I don't recognize this charge"
                   eligibility:
                     eligible: true
-                    rules_version: "rules-2026-01"
+                    rules_version: "rules-2026-01"                    
       responses:
         '201':
           description: Case created
@@ -61,6 +61,37 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+  /cases/{case_id}:
+    get:
+      summary: Get case details
+      operationId: getCase
+      tags: [cases]
+      parameters:
+        - in: header
+          name: x-correlation-id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: case_id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Case record
+          headers:
+            x-correlation-id:
+              required: true
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseRecord'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
 components:
   schemas:
     CreateDisputeRequest:
@@ -90,6 +121,19 @@ components:
         status:
           type: string
           enum: [opened]
+    CaseRecord:
+      type: object
+      required: [case_id, status, created_at, customer_id, transaction_id, amount_eur, reason, rules_version]
+      additionalProperties: false
+      properties:
+        case_id: { type: string }
+        status: { type: string, enum: [opened] }
+        created_at: { type: string, format: date-time }
+        customer_id: { type: string }
+        transaction_id: { type: string }
+        amount_eur: { type: number }
+        reason: { type: string }
+        rules_version: { type: string }
     Error:
       type: object
       required: [code, message]

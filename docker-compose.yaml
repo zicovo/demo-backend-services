@@ -1,0 +1,43 @@
+services:
+  gateway:
+    image: nginx:alpine
+    container_name: demo-api-gateway
+    ports:
+      - "8080:80" # VM port 8080 -> container port 80 (since port 80 is already used on the VM)
+    volumes:
+      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - idv
+      - payments
+      - cases
+    restart: unless-stopped
+
+  idv:
+    build:
+      context: ./services/idv
+    container_name: demo-idv
+    environment:
+      - PORT=3001
+    expose:
+      - "3001"
+    restart: unless-stopped
+
+  payments:
+    build:
+      context: ./services/payments
+    container_name: demo-payments
+    environment:
+      - PORT=3002
+    expose:
+      - "3002"
+    restart: unless-stopped
+
+  cases:
+    build:
+      context: ./services/cases
+    container_name: demo-cases
+    environment:
+      - PORT=3003
+    expose:
+      - "3003"
+    restart: unless-stopped

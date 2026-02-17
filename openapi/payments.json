@@ -1,0 +1,264 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "description": "Demo payments service. Sensitive mutations require identity verification.\n",
+    "version": "1.0.0",
+    "title": "Payments API"
+  },
+  "paths": {
+    "/payments/direct-debit/{customer_id}": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-correlation-id",
+            "in": "header",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "customer_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "headers": {
+              "x-correlation-id": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Direct debit record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectDebitRecord"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getDirectDebit",
+        "summary": "Get direct debit details for a customer"
+      }
+    },
+    "/payments/direct-debit": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "responses": {
+          "200": {
+            "headers": {
+              "x-correlation-id": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "updated_at": "2026-02-17T12:00:00Z",
+                      "status": "success"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/DirectDebitUpdateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (verification required or not authorized)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "verification_required": {
+                    "value": {
+                      "message": "Identity verification token is required.",
+                      "code": "verification_required"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update direct debit details",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-correlation-id",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "Issued by IDV service; enforced by APIM",
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-verification-token",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "operationId": "updateDirectDebit",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "happy": {
+                  "value": {
+                    "mandate_reference": "MDT-000123",
+                    "iban": "BE68539007547034",
+                    "customer_id": "cust-001"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/DirectDebitUpdateRequest"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "DirectDebitUpdateRequest": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "iban",
+          "mandate_reference"
+        ],
+        "properties": {
+          "mandate_reference": {
+            "type": "string"
+          },
+          "iban": {
+            "type": "string",
+            "description": "IBAN (demo format validation handled by service/APIM if desired)"
+          },
+          "customer_id": {
+            "type": "string"
+          }
+        }
+      },
+      "DirectDebitRecord": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "iban",
+          "mandate_reference",
+          "updated_at"
+        ],
+        "properties": {
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mandate_reference": {
+            "type": "string"
+          },
+          "iban": {
+            "type": "string"
+          },
+          "customer_id": {
+            "type": "string"
+          }
+        }
+      },
+      "DirectDebitUpdateResponse": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "updated_at"
+        ],
+        "properties": {
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://apim.example.com"
+    }
+  ]
+}
