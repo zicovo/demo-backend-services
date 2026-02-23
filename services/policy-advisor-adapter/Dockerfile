@@ -1,12 +1,12 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm install --production
+RUN npm install --omit=dev
 
 COPY server.js .
 
 EXPOSE 3004
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

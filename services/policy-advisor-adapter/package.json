@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@azure/identity": "^4.13.0",
     "axios": "^1.13.5",
     "fastify": "^5.7.4"
   }
