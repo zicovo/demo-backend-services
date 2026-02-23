@@ -41,3 +41,15 @@ services:
     expose:
       - "3003"
     restart: unless-stopped
+
+  policy-advisor-adapter:
+    build:
+      context: ./services/policy-advisor-adapter
+    container_name: demo-policy-advisor-adapter
+    environment:
+      - PORT=3004
+      - FOUNDRY_URL=https://agentic-demo-webinar-resource.services.ai.azure.com/api/projects/agentic-demo-webinar/applications/policy-advisor/protocols/openai/responses?api-version=2025-11-15-preview
+      - AZURE_AI_FOUNDRY_API_KEY=1bYrEP0Q4gqEvGG3LqHPXaBLhcZpNvWbPY1pwS2oN27GuUYhFxSXJQQJ99CBACfhMk5XJ3w3AAAAACOGR7ux
+    expose:
+      - "3004"
+    restart: unless-stopped
