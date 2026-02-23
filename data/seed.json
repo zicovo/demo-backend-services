@@ -1,0 +1,95 @@
+{
+  "_description": "Seed data for the demo backend services. Loaded via seed-demo-data.ps1 before running demos.",
+  "customers": [
+    {
+      "customer_id": "cust-001",
+      "name": "Emma De Vries",
+      "iban": "BE71096123456769",
+      "mandate_reference": "MDT-000123",
+      "dd_amount_eur": 850.00,
+      "notes": "Happy path customer — standard DD, low-value dispute"
+    },
+    {
+      "customer_id": "cust-002",
+      "name": "Lars Van den Berg",
+      "iban": "DE89370400440532013999",
+      "mandate_reference": "MDT-000456",
+      "dd_amount_eur": 7500.00,
+      "notes": "High-value DD customer — triggers €5,000 threshold"
+    },
+    {
+      "customer_id": "cust-003",
+      "name": "Sophie Maes",
+      "iban": "BE62510007547061",
+      "mandate_reference": "MDT-000789",
+      "dd_amount_eur": 120.00,
+      "notes": "Low-confidence dispute customer — Knowledge Agent unsure"
+    },
+    {
+      "customer_id": "cust-004",
+      "name": "Jan Peeters",
+      "iban": "BE68539007540001",
+      "mandate_reference": "MDT-000321",
+      "dd_amount_eur": 450.00,
+      "notes": "IDV failure customer — no OTP, low KBV score"
+    },
+    {
+      "customer_id": "cust-005",
+      "name": "Marie Janssen",
+      "iban": "NL91ABNA0417164300",
+      "mandate_reference": "MDT-000654",
+      "dd_amount_eur": 200.00,
+      "notes": "High-value dispute customer — €2,500 fraud claim"
+    },
+    {
+      "customer_id": "cust-006",
+      "name": "Thomas Willems",
+      "iban": "BE39067012345678",
+      "mandate_reference": "MDT-000987",
+      "dd_amount_eur": 95.00,
+      "notes": "Policy violation customer — dispute outside 120-day window"
+    }
+  ],
+  "transactions": [
+    {
+      "transaction_id": "txn-24750",
+      "customer_id": "cust-001",
+      "amount_eur": 247.50,
+      "merchant": "Unknown Online Store",
+      "date": "2026-02-10T15:30:00Z",
+      "notes": "Happy path dispute target"
+    },
+    {
+      "transaction_id": "txn-31200",
+      "customer_id": "cust-002",
+      "amount_eur": 312.00,
+      "merchant": "StreamingService Pro",
+      "date": "2026-02-05T08:00:00Z",
+      "notes": "Duplicate subscription charge"
+    },
+    {
+      "transaction_id": "txn-55100",
+      "customer_id": "cust-003",
+      "amount_eur": 451.00,
+      "merchant": "SaaS Platform Monthly",
+      "date": "2026-01-28T12:00:00Z",
+      "notes": "Possibly forgotten subscription — low-confidence dispute"
+    },
+    {
+      "transaction_id": "txn-77700",
+      "customer_id": "cust-005",
+      "amount_eur": 2500.00,
+      "merchant": "Petrol Station Card Clone",
+      "date": "2026-02-18T19:45:00Z",
+      "notes": "High-value fraud — card cloned"
+    },
+    {
+      "transaction_id": "txn-old-999",
+      "customer_id": "cust-006",
+      "amount_eur": 300.00,
+      "merchant": "Old Webshop Purchase",
+      "date": "2025-08-15T10:00:00Z",
+      "notes": "6 months old — outside 120-day dispute window"
+    }
+  ]
+}

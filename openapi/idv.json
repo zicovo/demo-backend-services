@@ -170,7 +170,7 @@
   },
   "servers": [
     {
-      "url": "https://apim.example.com"
+      "url": "https://apim-netic-shared-weu-001.azure-api.net"
     }
   ]
 }
